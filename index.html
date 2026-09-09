@@ -571,6 +571,87 @@ function finishLogin(){
   saveProfileToFirestore();
   enterDashboard();
 }
+  /* ---------------- SCHOLARSHIP (MahaDBT / NSP official data) ---------------- */
+const scholarshipData = {
+  "SC": {
+    icon:"🎓",
+    dept:"Social Justice and Special Assistance Department",
+    schemes:[
+      {name:"Government of India Post-Matric Scholarship", elig:"Family income ≤ ₹2,50,000; SC/Navbouddha; Maharashtra resident; SSC/equivalent passed", benefit:"Tuition fee, exam fee, maintenance allowance"},
+      {name:"Rajarshi Chhatrapati Shahu Maharaj Merit Scholarship", elig:"SC students with 75%+ marks in SSC, studying 11th/12th, no income limit", benefit:"₹300/month for 10 months (2 years)"}
+    ]
+  },
+  "ST": {
+    icon:"🎓",
+    dept:"Tribal Development Department",
+    schemes:[
+      {name:"Post Matric Scholarship Scheme (GoI)", elig:"Family income ≤ ₹2,50,000; ST category; minimum 10th pass", benefit:"Tuition fee, exam fee, maintenance allowance"},
+      {name:"Tuition Fee & Exam Fee Freeship for Tribal Students", elig:"ST category students in approved institutions", benefit:"Full tuition & exam fee reimbursement"}
+    ]
+  },
+  "OBC / VJNT / SBC": {
+    icon:"🎓",
+    dept:"OBC, SEBC, VJNT & SBC Welfare Department",
+    schemes:[
+      {name:"Post Matric Scholarship to OBC/VJNT/SBC Students", elig:"Family income ≤ ₹1,50,000; OBC/VJNT/SBC category; Maharashtra resident", benefit:"Tuition fee, exam fee, maintenance allowance"},
+      {name:"Tuition Fees & Examination Fees Reimbursement", elig:"OBC/SBC category students in professional courses via CAP round", benefit:"Full tuition & exam fee reimbursement"}
+    ]
+  },
+  "EBC": {
+    icon:"🎓",
+    dept:"Higher & Technical Education Department",
+    schemes:[
+      {name:"Rajarshi Chhatrapati Shahu Maharaj Shikshan Shulkh Shishyavrutti Yojna", elig:"Economically Backward Class; family income as per scheme norms", benefit:"Tuition fee reimbursement"}
+    ]
+  },
+  "Minority": {
+    icon:"🎓",
+    dept:"Minority Development Department",
+    schemes:[
+      {name:"Pre-Matric / Post-Matric Scholarship for Minority Students", elig:"Muslim, Christian, Sikh, Buddhist, Parsi, Jain community students; income criteria apply", benefit:"Tuition fee, maintenance allowance (via National Scholarship Portal)"}
+    ]
+  },
+  "EWS / Open": {
+    icon:"🎓",
+    dept:"Higher & Technical Education Department",
+    schemes:[
+      {name:"Education Fee Reimbursement (EWS/SEBC affected Open category)", elig:"Open category students affected by EWS/SEBC reservation in professional courses", benefit:"Partial/full fee reimbursement"}
+    ]
+  }
+};
+function renderScholarshipGrid(){
+  let html = `<div class="grid5">`;
+  Object.keys(scholarshipData).forEach(cat=>{
+    html += `<div class="course-tile" onclick="openScholarshipDetail('${cat}')">
+      <div class="ic">${scholarshipData[cat].icon}</div><h4>${cat}</h4>
+      <div class="cnt">${scholarshipData[cat].schemes.length} schemes</div>
+    </div>`;
+  });
+  html += `</div>`;
+  document.getElementById('content-area').innerHTML = html;
+}
+function openScholarshipDetail(cat){
+  const d = scholarshipData[cat];
+  let html = `<div class="backbar"><button onclick="renderScholarshipGrid()">←</button><h3>${cat} Scholarships</h3></div>
+    <div class="adm-card">
+      <div class="adm-head"><div><div class="tag">${d.dept}</div><h4>${cat} — Scholarship Schemes</h4></div></div>
+      <div class="adm-body open">
+        ${d.schemes.map(s=>`
+          <div class="prog-row">
+            <div class="pname">${s.name}</div>
+            <div class="pdet">Eligibility: ${s.elig}<br>Benefit: ${s.benefit}</div>
+          </div>`).join("")}
+        <a class="reg-link" href="https://mahadbt.maharashtra.gov.in" target="_blank">MahaDBT Portal Kholein (Registration)</a>
+        <div class="exam-links">
+          <a href="https://scholarships.gov.in" target="_blank">National Scholarship Portal</a>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:10.5px;color:var(--muted);text-align:center;margin-top:8px;">Documents zaroori: Caste Certificate, Income Certificate, Caste Validity (professional courses ke liye), latest marksheet</p>`;
+  document.getElementById('content-area').innerHTML = html;
+}
+
+/* ---------------- MAIN TABS ---------------- */
 /* ---------------- MAIN TABS ---------------- */
 function renderAdmissionGrid(){
   let html = `<div class="grid5">
