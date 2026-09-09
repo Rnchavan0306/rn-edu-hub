@@ -542,7 +542,49 @@ async function checkExistingProfileAndProceed(){
   }
   showStep('step-email'); // naya student — pehli baar profile bharni hogi
 }
+function showEditProfileForm(){
+  document.getElementById('content-area').innerHTML = `
+    <div class="subject-card">
+      <h4>Profile Edit karein</h4>
+      <div class="field">
+        <label>Poora Naam</label>
+        <input type="text" id="editName" value="${currentUser.name||''}">
+      </div>
+      <div class="field">
+        <label>Address</label>
+        <input type="text" id="editAddress" value="${currentUser.address||''}">
+      </div>
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" id="editEmail" value="${currentUser.email||''}">
+      </div>
+      <div class="field">
+        <label>Course</label>
+        <select id="editCourse">
+          <option value="Pharmacy" ${currentUser.course==='Pharmacy'?'selected':''}>Pharmacy</option>
+          <option value="Nursing" ${currentUser.course==='Nursing'?'selected':''}>Nursing</option>
+          <option value="NEET" ${currentUser.course==='NEET'?'selected':''}>NEET</option>
+          <option value="JEE" ${currentUser.course==='JEE'?'selected':''}>JEE</option>
+          <option value="Polytechnic" ${currentUser.course==='Polytechnic'?'selected':''}>Polytechnic</option>
+        </select>
+      </div>
+      <button class="btn" onclick="saveEditedProfile()">Save Karein</button>
+      <button class="btn secondary" style="margin-top:8px" onclick="bottomNav('profile')">Cancel</button>
+    </div>`;
+}
+function saveEditedProfile(){
+  currentUser.name = document.getElementById('editName').value.trim() || "Student";
+  currentUser.address = document.getElementById('editAddress').value.trim() || "-";
+  currentUser.email = document.getElementById('editEmail').value.trim() || "-";
+  currentUser.course = document.getElementById('editCourse').value;
+  saveProfileToFirestore();
+  document.getElementById('welcomeText').innerText = currentUser.name+" • "+currentUser.course;
+  document.getElementById('avatarInit').innerText = currentUser.name.charAt(0).toUpperCase();
+  alert('Profile update ho gaya ✅');
+  bottomNav('profile');
+}
 
+function saveProfileToFirestore(){
 function saveProfileToFirestore(){
   if(!firebaseReady || !currentUser.mobile) return;
   window.db.collection('students').doc(currentUser.mobile).set({
