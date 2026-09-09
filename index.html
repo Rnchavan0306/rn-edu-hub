@@ -512,21 +512,50 @@ async function verifyOtp(){
   const o = document.getElementById('otpInput').value.trim();
   if(!firebaseReady){
     if(o!==genOtp){ alert("OTP galat hai. Demo OTP upar dikhaya gaya hai."); return; }
-    showStep('step-email');
+    await checkExistingProfileAndProceed();
     return;
   }
   try{
     await confirmationResult.confirm(o);
-    showStep('step-email');
+    await checkExistingProfileAndProceed();
   }catch(e){
     alert("OTP galat hai, dobara try karein.");
   }
 }
-function finishLogin(){
-  currentUser.email = document.getElementById('emailInput').value.trim() || "student@example.com";
-  currentUser.name = document.getElementById('nameInput').value.trim() || "Student";
-  currentUser.address = document.getElementById('addressInput').value.trim() || "-";
-  currentUser.course = document.getElementById('courseInput').value;
+
+/* Agar is mobile number ka profile pehle se saved hai, seedha dashboard khol do.
+   Warna pehli baar profile bharne wali screen dikhao. */
+async function checkExistingProfileAndProceed(){
+  if(firebaseReady && currentUser.mobile){
+    try{
+      const doc = await window.db.collection('students').doc(currentUser.mobile).get();
+      if(doc.exists){
+        const data = doc.data();
+        currentUser.name = data.name || "Student";
+        currentUser.email = data.email || "";
+        currentUser.address = data.address || "-";
+        currentUser.course = data.course || "Pharmacy";
+        enterDashboard();
+        return;
+      }
+    }catch(e){ console.error(e); }
+  }
+  showStep('step-email'); // naya student — pehli baar profile bharni hogi
+}
+
+function saveProfileToFirestore(){
+  if(!firebaseReady || !currentUser.mobile) return;
+  window.db.collection('students').doc(currentUser.mobile).set({
+    name: currentUser.name,
+    email: currentUser.email,
+    address: currentUser.address,
+    course: currentUser.course,
+    mobile: currentUser.mobile,
+    updatedAt: Date.now()
+  }).catch(e=>console.error(e));
+}
+
+function enterDashboard(){
   document.getElementById('login').classList.remove('active');
   document.getElementById('dashboard').classList.add('active');
   document.getElementById('welcomeText').innerText = currentUser.name+" • "+currentUser.course;
@@ -534,6 +563,14 @@ function finishLogin(){
   bottomNav('home');
 }
 
+function finishLogin(){
+  currentUser.email = document.getElementById('emailInput').value.trim() || "student@example.com";
+  currentUser.name = document.getElementById('nameInput').value.trim() || "Student";
+  currentUser.address = document.getElementById('addressInput').value.trim() || "-";
+  currentUser.course = document.getElementById('courseInput').value;
+  saveProfileToFirestore();
+  enterDashboard();
+}
 /* ---------------- MAIN TABS ---------------- */
 function renderAdmissionGrid(){
   let html = `<div class="grid5">
