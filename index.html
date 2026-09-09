@@ -4,16 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RN Edu Hub</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#12554A">
 <link rel="icon" type="image/png" href="data:image/png;base64,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">
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js').catch(e => console.warn('SW register failed', e));
-    });
-  }
-</script>
+
 <style>
   :root{
     --ink:#132A3E;
@@ -266,11 +258,11 @@
   // 👉 STEP 1: Paste your own Firebase project config here (from Firebase Console > Project Settings)
   const firebaseConfig = {
     apiKey: "AIzaSyAZLPz6WTUzMAjW1ZJauVlwKwqX4uxgDiw",
-authDomain: "rn-edu-hub.firebaseapp.com",
-projectId: "rn-edu-hub",
-storageBucket: "rn-edu-hub.firebasestorage.app",
-messagingSenderId: "743491016494",
-appId: "1:743491016494:web:4a52f1d0303af04f464cbf"
+    authDomain: "rn-edu-hub.firebaseapp.com",
+    projectId: "rn-edu-hub",
+    storageBucket: "rn-edu-hub.firebasestorage.app",
+    messagingSenderId: "743491016494",
+    appId: "1:743491016494:web:4a52f1d0303af04f464cbf"
   };
   let firebaseReady = false;
   try{
@@ -542,6 +534,7 @@ async function checkExistingProfileAndProceed(){
   }
   showStep('step-email'); // naya student — pehli baar profile bharni hogi
 }
+
 function showEditProfileForm(){
   document.getElementById('content-area').innerHTML = `
     <div class="subject-card">
@@ -585,7 +578,6 @@ function saveEditedProfile(){
 }
 
 function saveProfileToFirestore(){
-function saveProfileToFirestore(){
   if(!firebaseReady || !currentUser.mobile) return;
   window.db.collection('students').doc(currentUser.mobile).set({
     name: currentUser.name,
@@ -613,7 +605,24 @@ function finishLogin(){
   saveProfileToFirestore();
   enterDashboard();
 }
-  /* ---------------- SCHOLARSHIP (MahaDBT / NSP official data) ---------------- */
+
+function studentLogout(){
+  if(!confirm('Kya aap sach me logout karna chahte hain?')) return;
+  if(firebaseReady && firebase.auth().currentUser){
+    firebase.auth().signOut().catch(()=>{});
+  }
+  currentUser = { mobile:"", email:"", name:"", address:"", course:"Pharmacy" };
+  adminMode = false;
+  confirmationResult = null;
+  recaptchaVerifier = null;
+  document.getElementById('mobileInput').value = "";
+  document.getElementById('otpInput').value = "";
+  document.getElementById('dashboard').classList.remove('active');
+  document.getElementById('login').classList.add('active');
+  showStep('step-mobile');
+}
+
+/* ---------------- SCHOLARSHIP (MahaDBT / NSP official data) ---------------- */
 const scholarshipData = {
   "SC": {
     icon:"🎓",
@@ -694,7 +703,6 @@ function openScholarshipDetail(cat){
 }
 
 /* ---------------- MAIN TABS ---------------- */
-  
 function renderAdmissionGrid(){
   let html = `<div class="grid5">
     <div class="course-tile" onclick="openAdmissionDetail('Pharmacy')"><div class="ic">💊</div><h4>Pharmacy</h4><div class="cnt">${admissionData.Pharmacy.programs.length} programs</div></div>
@@ -836,6 +844,8 @@ function bottomNav(section){
           Email: ${currentUser.email||'-'}<br>
           Selected Course: ${currentUser.course||'-'}
         </p>
+        <button class="btn secondary" style="margin-top:10px" onclick="showEditProfileForm()">✏️ Profile Edit karein</button>
+        <button class="btn secondary" style="margin-top:8px" onclick="studentLogout()">🚪 Logout</button>
       </div>
       <div class="subject-card">
         <h4>${adminMode ? '🔓 Admin Mode ON' : '🔐 Admin Access'}</h4>
