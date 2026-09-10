@@ -579,7 +579,48 @@ function saveEditedProfile(){
   alert('Profile update ho gaya ✅');
   bottomNav('profile');
 }
+/* ---------------- PREMIUM SUBSCRIPTION (Razorpay — ₹9/month) ---------------- */
+function isPremiumActive(){
+  return currentUser.isPremium && currentUser.premiumExpiry && Date.now() < currentUser.premiumExpiry;
+}
+function openPremiumCheckout(){
+  if(typeof Razorpay === 'undefined'){ alert('Payment system load nahi hua. Internet connection check karein.'); return; }
+  const options = {
+    key: "rzp_test_TaF9IQpVTq8fI8",
+    amount: 900,
+    currency: "INR",
+    name: "RN Edu Hub",
+    description: "Premium Subscription — 1 Month",
+    handler: function(response){
+      activatePremium();
+    },
+    prefill: {
+      name: currentUser.name || "",
+      email: currentUser.email || "",
+      contact: currentUser.mobile || ""
+    },
+    theme: { color: "#12554A" }
+  };
+  const rzp = new Razorpay(options);
+  rzp.on('payment.failed', function(response){
+    alert('Payment fail ho gaya. Dobara try karein.');
+  });
+  rzp.open();
+}
+function activatePremium(){
+  const expiry = Date.now() + 30*24*60*60*1000;
+  currentUser.isPremium = true;
+  currentUser.premiumExpiry = expiry;
+  if(firebaseReady && currentUser.mobile){
+    window.db.collection('students').doc(currentUser.mobile).set({
+      isPremium: true, premiumExpiry: expiry
+    }, {merge:true}).catch(e=>console.error(e));
+  }
+  alert('🎉 Payment successful! Premium 30 din ke liye activate ho gaya.');
+  bottomNav('profile');
+}
 
+function saveProfileToFirestore(){
 function saveProfileToFirestore(){
   if(!firebaseReady || !currentUser.mobile) return;
   window.db.collection('students').doc(currentUser.mobile).set({
