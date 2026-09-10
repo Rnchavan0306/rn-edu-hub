@@ -847,8 +847,15 @@ function bottomNav(section){
           Email: ${currentUser.email||'-'}<br>
           Selected Course: ${currentUser.course||'-'}
         </p>
-        <button class="btn secondary" style="margin-top:10px" onclick="showEditProfileForm()">✏️ Profile Edit karein</button>
+       <button class="btn secondary" style="margin-top:10px" onclick="showEditProfileForm()">✏️ Profile Edit karein</button>
         <button class="btn secondary" style="margin-top:8px" onclick="studentLogout()">🚪 Logout</button>
+      </div>
+      <div class="subject-card">
+        <h4>${isPremiumActive() ? '⭐ Premium Active' : '⭐ Premium Subscription'}</h4>
+        <p style="font-size:12px;color:var(--muted);">${isPremiumActive() ? 'Expires on: '+new Date(currentUser.premiumExpiry).toLocaleDateString('en-IN') : 'Sirf ₹9/month me poora premium content unlock karein.'}</p>
+        ${isPremiumActive()
+          ? `<button class="btn secondary" style="margin-top:8px" onclick="openPremiumCheckout()">Renew Karein</button>`
+          : `<button class="btn amber" style="margin-top:8px" onclick="openPremiumCheckout()">₹9 me Subscribe Karein</button>`}
       </div>
       <div class="subject-card">
         <h4>${adminMode ? '🔓 Admin Mode ON' : '🔐 Admin Access'}</h4>
