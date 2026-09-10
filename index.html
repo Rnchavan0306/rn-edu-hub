@@ -1011,6 +1011,18 @@ async function adminEditUnits(course,sub,year,subject){
 async function openModal(type, course, sub, year, subject){
   const overlay = document.getElementById('modalOverlay');
   const body = document.getElementById('modalBody');
+  if(!adminMode && !isPremiumActive() && year !== "1st Year" && (type==='syllabus' || type==='notes' || type==='quiz')){
+    body.innerHTML = `<button class="close" onclick="closeModal()">✕</button>
+      <h3>🔒 Premium Content</h3>
+      <p style="font-size:12.5px;color:var(--muted);margin-top:6px;">
+        ${subject} ka ${type==='syllabus'?'Syllabus':type==='notes'?'Notes':'Quiz'} dekhne ke liye
+        Premium Subscription chahiye.
+      </p>
+      <p style="font-size:20px;font-weight:700;color:var(--teal-deep);text-align:center;margin:14px 0;">₹9 <span style="font-size:12px;font-weight:400;color:var(--muted);">/ month</span></p>
+      <button class="btn amber" style="width:100%;" onclick="closeModal(); openPremiumCheckout();">₹9 me Subscribe Karein</button>`;
+    overlay.classList.add('open');
+    return;
+  }
   let html = `<button class="close" onclick="closeModal()">✕</button><h3>${subject}</h3>
     <p style="font-size:11px;color:var(--muted);margin-top:0;">${course} • ${sub} • ${year}</p>`;
 
