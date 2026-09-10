@@ -579,6 +579,7 @@ function saveEditedProfile(){
   alert('Profile update ho gaya ✅');
   bottomNav('profile');
 }
+
 /* ---------------- PREMIUM SUBSCRIPTION (Razorpay — ₹9/month) ---------------- */
 function isPremiumActive(){
   return currentUser.isPremium && currentUser.premiumExpiry && Date.now() < currentUser.premiumExpiry;
@@ -586,8 +587,8 @@ function isPremiumActive(){
 function openPremiumCheckout(){
   if(typeof Razorpay === 'undefined'){ alert('Payment system load nahi hua. Internet connection check karein.'); return; }
   const options = {
-    key: "rzp_test_TaF9IQpVTq8fI8",
-    amount: 900,
+    key: "rzp_test_TaF9IQpVTq8fI8", // 👉 Razorpay Dashboard se apna Test/Live Key ID yahan daalein
+    amount: 900, // paise me — matlab ₹9
     currency: "INR",
     name: "RN Edu Hub",
     description: "Premium Subscription — 1 Month",
@@ -608,7 +609,7 @@ function openPremiumCheckout(){
   rzp.open();
 }
 function activatePremium(){
-  const expiry = Date.now() + 30*24*60*60*1000;
+  const expiry = Date.now() + 30*24*60*60*1000; // 30 din
   currentUser.isPremium = true;
   currentUser.premiumExpiry = expiry;
   if(firebaseReady && currentUser.mobile){
@@ -620,7 +621,6 @@ function activatePremium(){
   bottomNav('profile');
 }
 
-function saveProfileToFirestore(){
 function saveProfileToFirestore(){
   if(!firebaseReady || !currentUser.mobile) return;
   window.db.collection('students').doc(currentUser.mobile).set({
@@ -888,7 +888,7 @@ function bottomNav(section){
           Email: ${currentUser.email||'-'}<br>
           Selected Course: ${currentUser.course||'-'}
         </p>
-       <button class="btn secondary" style="margin-top:10px" onclick="showEditProfileForm()">✏️ Profile Edit karein</button>
+        <button class="btn secondary" style="margin-top:10px" onclick="showEditProfileForm()">✏️ Profile Edit karein</button>
         <button class="btn secondary" style="margin-top:8px" onclick="studentLogout()">🚪 Logout</button>
       </div>
       <div class="subject-card">
@@ -1011,6 +1011,8 @@ async function adminEditUnits(course,sub,year,subject){
 async function openModal(type, course, sub, year, subject){
   const overlay = document.getElementById('modalOverlay');
   const body = document.getElementById('modalBody');
+
+  /* Premium paywall — 1st Year hamesha FREE hai; 2nd year se aage ₹9/month subscription chahiye (Admin free hai) */
   if(!adminMode && !isPremiumActive() && year !== "1st Year" && (type==='syllabus' || type==='notes' || type==='quiz')){
     body.innerHTML = `<button class="close" onclick="closeModal()">✕</button>
       <h3>🔒 Premium Content</h3>
@@ -1023,6 +1025,7 @@ async function openModal(type, course, sub, year, subject){
     overlay.classList.add('open');
     return;
   }
+
   let html = `<button class="close" onclick="closeModal()">✕</button><h3>${subject}</h3>
     <p style="font-size:11px;color:var(--muted);margin-top:0;">${course} • ${sub} • ${year}</p>`;
 
