@@ -528,6 +528,8 @@ async function checkExistingProfileAndProceed(){
         currentUser.email = data.email || "";
         currentUser.address = data.address || "-";
         currentUser.course = data.course || "Pharmacy";
+        currentUser.isPremium = data.isPremium || false;
+        currentUser.premiumExpiry = data.premiumExpiry || 0;
         enterDashboard();
         return;
       }
