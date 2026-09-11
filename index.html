@@ -283,19 +283,26 @@ const admissionData = {
   Pharmacy: {
     tag:"PHARMACY ADMISSIONS",
     programs:[
-      {name:"D. Pharm (Diploma in Pharmacy)", dur:"2 Years", elig:"12th (Science) pass", seats:"60"},
-      {name:"B. Pharm (Bachelor of Pharmacy)", dur:"4 Years", elig:"12th PCB/PCM, NEET not mandatory", seats:"100"},
-      {name:"M. Pharm (Master of Pharmacy)", dur:"2 Years", elig:"B.Pharm with valid GPAT", seats:"25"},
+      {name:"D. Pharm (Diploma in Pharmacy)", dur:"2 Years", elig:"12th (Science) pass", seats:"60",
+        docs:["10th & 12th Marksheet","School/College Leaving Certificate","Domicile Certificate","Caste Certificate (if applicable)","Passport size photos","Aadhar Card"]},
+      {name:"B. Pharm (Bachelor of Pharmacy)", dur:"4 Years", elig:"12th PCB/PCM, NEET not mandatory", seats:"100",
+        docs:["12th Marksheet","CET/Entrance Scorecard (if required)","Leaving Certificate","Domicile Certificate","Caste Certificate (if applicable)","Passport size photos","Aadhar Card"]},
+      {name:"M. Pharm (Master of Pharmacy)", dur:"2 Years", elig:"B.Pharm with valid GPAT", seats:"25",
+        docs:["B.Pharm Marksheet & Degree","GPAT Scorecard","Leaving Certificate","Caste Certificate (if applicable)","Passport size photos"]},
     ],
     reg:"#"
   },
   Nursing: {
     tag:"NURSING ADMISSIONS",
     programs:[
-      {name:"GNM (General Nursing & Midwifery)", dur:"3.5 Years", elig:"12th pass (any stream)", seats:"50"},
-      {name:"B.Sc Nursing", dur:"4 Years", elig:"12th PCB, NEET score required", seats:"60"},
-      {name:"P.B. B.Sc Nursing", dur:"2 Years", elig:"GNM + registered nurse", seats:"30"},
-      {name:"M.Sc Nursing", dur:"2 Years", elig:"B.Sc Nursing with min. 55%", seats:"20"},
+      {name:"GNM (General Nursing & Midwifery)", dur:"3 Years", elig:"12th pass (any stream)", seats:"50",
+        docs:["12th Marksheet","Leaving Certificate","Domicile Certificate","Caste Certificate (if applicable)","Medical Fitness Certificate","Passport size photos","Aadhar Card"]},
+      {name:"B.Sc Nursing", dur:"4 Years", elig:"12th PCB, NEET score required", seats:"60",
+        docs:["12th Marksheet (PCB)","NEET Scorecard","Leaving Certificate","Domicile Certificate","Caste Certificate (if applicable)","Medical Fitness Certificate","Passport size photos","Aadhar Card"]},
+      {name:"P.B. B.Sc Nursing", dur:"2 Years", elig:"GNM + registered nurse", seats:"30",
+        docs:["GNM Marksheet & Certificate","Nursing Council Registration","Experience Certificate","Leaving Certificate","Passport size photos"]},
+      {name:"M.Sc Nursing", dur:"2 Years", elig:"B.Sc Nursing with min. 55%", seats:"20",
+        docs:["B.Sc Nursing Marksheet & Degree","Nursing Council Registration","Leaving Certificate","Passport size photos"]},
     ],
     reg:"#",
     exams:["NEET Registration","CET Registration","JEE Registration"]
@@ -580,9 +587,109 @@ function saveEditedProfile(){
   bottomNav('profile');
 }
 
+/* ---------------- PREVIOUS YEAR QUESTION PAPERS (Premium Bonus) ---------------- */
+const pyqCourses = ["Pharmacy","Nursing","NEET","JEE","Polytechnic"];
+const pyqYears = ["2025","2024","2023","2022","2021"];
+const pyqIcons = {"Pharmacy":"💊","Nursing":"🩺","NEET":"🧬","JEE":"📐","Polytechnic":"⚙️"};
+
+function renderPYQGrid(){
+  let html = `<div class="grid5">`;
+  pyqCourses.forEach(c=>{
+    html += `<div class="course-tile" onclick="openPYQCourse('${c}')"><div class="ic">${pyqIcons[c]}</div><h4>${c}</h4><div class="cnt">${pyqYears.length} years</div></div>`;
+  });
+  html += `</div>`;
+  document.getElementById('content-area').innerHTML = html;
+}
+
+function openPYQCourse(course){
+  if(!adminMode && !isPremiumActive()){
+    document.getElementById('content-area').innerHTML = `
+      <div class="backbar"><button onclick="renderPYQGrid()">←</button><h3>${course} — Previous Papers</h3></div>
+      <div class="subject-card">
+        <h4>🔒 Premium Bonus Content</h4>
+        <p style="font-size:12.5px;color:var(--muted);">Previous year question papers Premium Subscription ke saath <b>FREE</b> milte hain — bonus feature!</p>
+        <p style="font-size:20px;font-weight:700;color:var(--teal-deep);text-align:center;margin:14px 0;">₹9 <span style="font-size:12px;font-weight:400;color:var(--muted);">/ month</span></p>
+        <button class="btn amber" style="width:100%;" onclick="openPremiumCheckout()">₹9 me Subscribe Karein</button>
+      </div>`;
+    return;
+  }
+  let html = `<div class="backbar"><button onclick="renderPYQGrid()">←</button><h3>${course} — Previous Year Papers</h3></div>`;
+  pyqYears.forEach(y=>{
+    html += `<div class="subject-card" id="pyq-${course}-${y}"><h4>${y}</h4><p style="font-size:11px;color:var(--muted);">Load ho raha hai…</p></div>`;
+  });
+  document.getElementById('content-area').innerHTML = html;
+  pyqYears.forEach(y=> renderPYQYearCard(course,y));
+}
+
+function pyqKey(course,year){ return (course+"_"+year).replace(/[^a-zA-Z0-9_]/g,"_"); }
+
+async function fetchPYQFile(course,year){
+  if(!firebaseReady) return null;
+  try{
+    const doc = await window.db.collection('pyq_papers').doc(pyqKey(course,year)).get();
+    if(doc.exists) return doc.data();
+  }catch(e){ console.error(e); }
+  return null;
+}
+
+async function renderPYQYearCard(course,year){
+  const el = document.getElementById(`pyq-${course}-${year}`);
+  if(!el) return;
+  const file = await fetchPYQFile(course,year);
+  if(file){
+    el.innerHTML = `<h4>${year}</h4>
+      <div class="subject-actions">
+        <a class="btn" style="text-decoration:none;text-align:center;" href="${file.url}" target="_blank">📄 Paper Dekhein</a>
+        ${adminMode ? `<label class="btn secondary" style="cursor:pointer;">Badlein<input type="file" accept="application/pdf" style="display:none" onchange="handlePYQUpload(event,'${course}','${year}')"></label>` : ''}
+      </div>`;
+  } else {
+    el.innerHTML = `<h4>${year}</h4>
+      <p style="font-size:11px;color:var(--muted);">Abhi upload nahi hua hai.</p>
+      ${adminMode ? `<label class="btn" style="display:block;text-align:center;cursor:pointer;">Upload Karein<input type="file" accept="application/pdf" style="display:none" onchange="handlePYQUpload(event,'${course}','${year}')"></label>` : ''}`;
+  }
+}
+
+async function handlePYQUpload(evt,course,year){
+  const file = evt.target.files[0];
+  if(!file) return;
+  if(file.type !== 'application/pdf'){ alert('Sirf PDF file upload karein.'); return; }
+  if(!firebaseReady){ alert('Firebase configured nahi hai.'); return; }
+  try{
+    const path = `pyq/${course}/${year}/${Date.now()}_${file.name}`;
+    const ref = window.fbStorage.ref().child(path);
+    await ref.put(file);
+    const url = await ref.getDownloadURL();
+    await window.db.collection('pyq_papers').doc(pyqKey(course,year)).set({
+      name:file.name, url:url, course, year, uploadedAt:Date.now()
+    });
+    renderPYQYearCard(course,year);
+  }catch(e){
+    console.error(e);
+    alert('Upload fail hua.');
+  }
+}
+
 /* ---------------- PREMIUM SUBSCRIPTION (Razorpay — ₹9/month) ---------------- */
 function isPremiumActive(){
   return currentUser.isPremium && currentUser.premiumExpiry && Date.now() < currentUser.premiumExpiry;
+}
+function getPremiumReminderBanner(){
+  if(!currentUser.isPremium || !currentUser.premiumExpiry) return "";
+  const daysLeft = Math.ceil((currentUser.premiumExpiry - Date.now()) / (24*60*60*1000));
+  if(daysLeft <= 0){
+    return `<div class="subject-card" style="background:#FBEAEA;border-color:#B3413A;">
+      <h4 style="color:#B3413A;">⚠️ Premium Expire Ho Gaya</h4>
+      <p style="font-size:12px;color:var(--muted);">Syllabus, Notes, Quiz aur Previous Papers dobara unlock karne ke liye renew karein.</p>
+      <button class="btn amber" style="margin-top:6px" onclick="openPremiumCheckout()">₹9 me Renew Karein</button>
+    </div>`;
+  } else if(daysLeft <= 3){
+    return `<div class="subject-card" style="background:#FFF7E8;border-color:var(--amber);">
+      <h4 style="color:var(--amber);">⏰ Premium ${daysLeft} din me expire hoga</h4>
+      <p style="font-size:12px;color:var(--muted);">Time rehte renew kar lein taaki access na ruke.</p>
+      <button class="btn amber" style="margin-top:6px" onclick="openPremiumCheckout()">Abhi Renew Karein</button>
+    </div>`;
+  }
+  return "";
 }
 function openPremiumCheckout(){
   if(typeof Razorpay === 'undefined'){ alert('Payment system load nahi hua. Internet connection check karein.'); return; }
@@ -755,22 +862,60 @@ function renderAdmissionGrid(){
   document.getElementById('content-area').innerHTML = html;
 }
 
-function openAdmissionDetail(key){
+function admissionRegKey(course, progName){
+  return (course+"_"+progName).replace(/[^a-zA-Z0-9_]/g,"_");
+}
+async function fetchAdmissionRegLink(course, progName){
+  if(firebaseReady){
+    try{
+      const doc = await window.db.collection('admission_links').doc(admissionRegKey(course,progName)).get();
+      if(doc.exists && doc.data().url) return doc.data().url;
+    }catch(e){ console.error(e); }
+  }
+  return "";
+}
+async function adminEditAdmissionLink(course, progName){
+  if(!adminMode){ alert('Pehle Admin Login karein.'); return; }
+  const current = await fetchAdmissionRegLink(course, progName);
+  const url = prompt('Registration link daalein ('+progName+'):', current || 'https://');
+  if(url===null) return;
+  if(firebaseReady){
+    try{
+      await window.db.collection('admission_links').doc(admissionRegKey(course,progName)).set({
+        url, course, program:progName, updatedAt:Date.now()
+      });
+    }catch(e){ console.error(e); alert('Save fail hua.'); return; }
+  }
+  openAdmissionDetail(course);
+}
+
+async function openAdmissionDetail(key){
   const d = admissionData[key];
   let html = `<div class="backbar"><button onclick="renderAdmissionGrid()">←</button><h3>${key} Admission</h3></div>
     <div class="adm-card">
       <div class="adm-head"><div><div class="tag">${d.tag}</div><h4>${key} Admission ${new Date().getFullYear()}</h4></div></div>
-      <div class="adm-body open">
-        ${d.programs.map(p=>`
-          <div class="prog-row">
-            <div class="pname">${p.name}</div>
-            <div class="pdet">Duration: ${p.dur} &nbsp;|&nbsp; Eligibility: ${p.elig} &nbsp;|&nbsp; Seats: ${p.seats}</div>
-          </div>`).join("")}
-        <a class="reg-link" href="${d.reg}" onclick="return demoLink(event,'${key} Registration Form')">Registration Link Kholein</a>
-        ${d.exams ? `<div class="exam-links">${d.exams.map(e=>`<a href="#" onclick="return demoLink(event,'${e}')">${e}</a>`).join("")}</div>` : ""}
+      <div class="adm-body open" id="adm-body-${key}">
+        <p style="font-size:11px;color:var(--muted);text-align:center;">Load ho raha hai…</p>
       </div>
     </div>`;
   document.getElementById('content-area').innerHTML = html;
+
+  const links = await Promise.all(d.programs.map(p => fetchAdmissionRegLink(key, p.name)));
+
+  let body = d.programs.map((p,i)=>`
+          <div class="prog-row">
+            <div class="pname">${p.name}</div>
+            <div class="pdet">Duration: ${p.dur} &nbsp;|&nbsp; Eligibility: ${p.elig} &nbsp;|&nbsp; Seats: ${p.seats}</div>
+            <div class="pdet" style="margin-top:4px;"><b>Documents Required:</b> ${p.docs ? p.docs.join(", ") : "-"}</div>
+            <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              ${links[i]
+                ? `<a class="reg-link" style="padding:7px 12px;" href="${links[i]}" target="_blank">Registration Link Kholein</a>`
+                : `<span style="font-size:11px;color:var(--muted);">Registration link abhi add nahi hua</span>`}
+              ${adminMode ? `<button class="btn secondary" style="padding:6px 10px;font-size:11px;" onclick="adminEditAdmissionLink('${key}','${p.name}')">✏️ Link Edit (Admin)</button>` : ""}
+            </div>
+          </div>`).join("");
+  body += `${d.exams ? `<div class="exam-links" style="margin-top:10px;">${d.exams.map(e=>`<a href="#" onclick="return demoLink(event,'${e}')">${e}</a>`).join("")}</div>` : ""}`;
+  document.getElementById('adm-body-'+key).innerHTML = body;
 }
 
 function demoLink(e, label){
@@ -868,10 +1013,12 @@ function bottomNav(section){
         <h4>Namaste, ${currentUser.name||'Student'} 👋</h4>
         <p style="font-size:12.5px;color:var(--muted);">Aapka selected course: <b>${currentUser.course}</b></p>
       </div>
+      ${getPremiumReminderBanner()}
       <div class="grid5">
         <div class="course-tile" onclick="renderAdmissionGrid()"><div class="ic">🎓</div><h4>Admission</h4><div class="cnt">Pharmacy & Nursing</div></div>
         <div class="course-tile" onclick="renderCoursesGrid()"><div class="ic">📚</div><h4>Courses</h4><div class="cnt">Sabhi programs</div></div>
         <div class="course-tile" onclick="renderScholarshipGrid()"><div class="ic">💰</div><h4>Scholarship</h4><div class="cnt">Caste-wise schemes</div></div>
+        <div class="course-tile" onclick="renderPYQGrid()"><div class="ic">📄</div><h4>Previous Papers</h4><div class="cnt">Sabhi courses</div></div>
         <div class="course-tile" onclick="bottomNav('syllabus')"><div class="ic">📘</div><h4>Syllabus</h4><div class="cnt">Subject-wise</div></div>
         <div class="course-tile" onclick="bottomNav('notes')"><div class="ic">📝</div><h4>Notes</h4><div class="cnt">Unit-wise</div></div>
         <div class="course-tile" onclick="bottomNav('quiz')"><div class="ic">❓</div><h4>Quiz</h4><div class="cnt">Practice tests</div></div>
@@ -897,6 +1044,10 @@ function bottomNav(section){
         ${isPremiumActive()
           ? `<button class="btn secondary" style="margin-top:8px" onclick="openPremiumCheckout()">Renew Karein</button>`
           : `<button class="btn amber" style="margin-top:8px" onclick="openPremiumCheckout()">₹9 me Subscribe Karein</button>`}
+      </div>
+      <div class="subject-card" style="text-align:center;">
+        <p style="font-size:11px;color:var(--muted);margin:0;">App Founder</p>
+        <h4 style="margin-top:3px;">Mr. R. N. Chavan</h4>
       </div>
       <div class="subject-card">
         <h4>${adminMode ? '🔓 Admin Mode ON' : '🔐 Admin Access'}</h4>
@@ -1044,17 +1195,21 @@ async function openModal(type, course, sub, year, subject){
       html += `<div class="syll-item" style="border-bottom:none;margin-top:8px;">
           <span>📄 ${uploaded.name}</span>
           <a class="reg-link" style="padding:5px 10px;" href="${uploaded.url}" target="_blank">Kholein</a>
-        </div>
-        <label class="btn secondary" style="display:block;text-align:center;margin-top:6px;cursor:pointer;">
+        </div>`;
+      if(adminMode){
+        html += `<label class="btn secondary" style="display:block;text-align:center;margin-top:6px;cursor:pointer;">
           Naya PDF Upload karein
           <input type="file" accept="application/pdf" style="display:none" onchange="handleSyllabusUpload(event,'${course}','${sub}','${year}','${subject}')">
         </label>`;
-    } else {
+      }
+    } else if(adminMode){
       html += `<label class="btn" style="display:block;text-align:center;margin-top:12px;cursor:pointer;">
           Official Syllabus PDF Upload karein
           <input type="file" accept="application/pdf" style="display:none" onchange="handleSyllabusUpload(event,'${course}','${sub}','${year}','${subject}')">
         </label>
         <p style="font-size:10.5px;color:var(--muted);text-align:center;margin-top:6px;">College/Board ki official site se PDF download karke yahan upload karein${firebaseReady ? '' : ' (abhi sirf is session ke liye — permanent save ke liye upar Firebase config bharein)'}</p>`;
+    } else {
+      html += `<p style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px;">PDF abhi upload nahi hua hai.</p>`;
     }
     body.innerHTML = html;
     return;
