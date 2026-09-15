@@ -226,7 +226,7 @@
           <div class="sub" id="welcomeText">Welcome</div>
         </div>
       </div>
-      <div class="avatar" id="avatarInit">S</div>
+      <div class="avatar" id="avatarInit" onclick="bottomNav('profile')" style="cursor:pointer;">S</div>
     </div>
 
     <div class="content" id="content-area">
@@ -238,7 +238,7 @@
       <button data-nav="syllabus" onclick="bottomNav('syllabus')"><span class="ic">📘</span>Syllabus</button>
       <button data-nav="notes" onclick="bottomNav('notes')"><span class="ic">📝</span>Notes</button>
       <button data-nav="quiz" onclick="bottomNav('quiz')"><span class="ic">❓</span>Quiz</button>
-      <button data-nav="profile" onclick="bottomNav('profile')"><span class="ic">👤</span>Profile</button>
+      <button data-nav="mocktest" onclick="renderMockTestGrid(); document.querySelectorAll('.bottomnav button').forEach(b=>b.classList.toggle('active', b.dataset.nav==='mocktest'));"><span class="ic">📝</span>Mock Test</button>
     </div>
   </div>
 
@@ -315,6 +315,7 @@ const courseCategories = [
   {key:"NEET", icon:"🧬"},
   {key:"JEE", icon:"📐"},
   {key:"Polytechnic", icon:"⚙️"},
+  {key:"Engineering", icon:"🛠️"},
 ];
 
 const subProgramsByCourse = {
@@ -332,6 +333,7 @@ const subProgramsByCourse = {
   NEET:[{name:"NEET (UG)", years:["Physics","Chemistry","Biology"]}],
   JEE:[{name:"JEE Main / Advanced", years:["Physics","Chemistry","Maths"]}],
   Polytechnic:[{name:"Diploma Engineering", years:["1st Year","2nd Year","3rd Year"]}],
+  Engineering:[{name:"B.Tech / B.E.", years:["1st Year","2nd Year","3rd Year","4th Year"]}],
 };
 
 /* subjects per (course, subprogram, year) - sample data, 3D flag on one subject */
@@ -366,6 +368,10 @@ function getSubjects(course, sub, year){
     "Polytechnic|Diploma Engineering|1st Year":["Engineering Drawing","Basic Electrical Engg","Applied Mathematics","Applied Physics"],
     "Polytechnic|Diploma Engineering|2nd Year":["Strength of Materials","Electronics Engineering","Fluid Mechanics"],
     "Polytechnic|Diploma Engineering|3rd Year":["Industrial Management","Project Work","CAD/CAM"],
+    "Engineering|B.Tech / B.E.|1st Year":["Engineering Mathematics-I","Engineering Physics","Engineering Chemistry","Basic Electrical Engineering","Engineering Drawing","Programming for Problem Solving"],
+    "Engineering|B.Tech / B.E.|2nd Year":["Engineering Mathematics-II","Data Structures","Electronic Devices & Circuits","Digital Logic Design","Object Oriented Programming"],
+    "Engineering|B.Tech / B.E.|3rd Year":["Computer Networks","Database Management Systems","Operating Systems","Design & Analysis of Algorithms","Microprocessors"],
+    "Engineering|B.Tech / B.E.|4th Year":["Software Engineering","Artificial Intelligence & ML","Cloud Computing","Project Work","Elective Subject"],
   };
   return bank[key] || ["General Subject 1","General Subject 2"];
 }
@@ -585,6 +591,48 @@ function saveEditedProfile(){
   document.getElementById('avatarInit').innerText = currentUser.name.charAt(0).toUpperCase();
   alert('Profile update ho gaya ✅');
   bottomNav('profile');
+}
+
+/* ---------------- MOCK TEST (course-wise, uses Quiz modal) ---------------- */
+function renderMockTestGrid(){
+  let html = `<div class="backbar"><h3>Mock Test — Course Select Karein</h3></div><div class="grid5">`;
+  courseCategories.forEach(c=>{
+    html += `<div class="course-tile" onclick="openMockTestCourse('${c.key}')"><div class="ic">${c.icon}</div><h4>${c.key}</h4><div class="cnt">${subProgramsByCourse[c.key].length} programs</div></div>`;
+  });
+  html += `</div>`;
+  document.getElementById('content-area').innerHTML = html;
+}
+function openMockTestCourse(courseKey){
+  const subs = subProgramsByCourse[courseKey];
+  let html = `<div class="backbar"><button onclick="renderMockTestGrid()">←</button><h3>${courseKey} — Mock Test</h3></div><div class="grid5">`;
+  subs.forEach(s=>{
+    html += `<div class="course-tile" onclick="openMockTestSubProgram('${courseKey}','${s.name}')">
+      <div class="ic">${subProgramIcons[s.name] || "📚"}</div><h4>${s.name}</h4>
+      <div class="cnt">${s.years.length} sections</div>
+    </div>`;
+  });
+  html += `</div>`;
+  document.getElementById('content-area').innerHTML = html;
+}
+function openMockTestSubProgram(courseKey, subName, activeYear){
+  const subObj = subProgramsByCourse[courseKey].find(s=>s.name===subName);
+  const year = activeYear || subObj.years[0];
+  let html = `<div class="backbar"><button onclick="openMockTestCourse('${courseKey}')">←</button><h3>${subName} — Mock Test</h3></div>
+    <div class="yeartab">`;
+  subObj.years.forEach(y=>{
+    html += `<button class="${y===year?'active':''}" onclick="openMockTestSubProgram('${courseKey}','${subName}','${y}')">${y}</button>`;
+  });
+  html += `</div>`;
+  const subjects = getSubjects(courseKey, subName, year);
+  subjects.forEach(subj=>{
+    html += `<div class="subject-card">
+      <h4>${subj}</h4>
+      <div class="subject-actions">
+        <button class="d3" onclick="openModal('quiz','${courseKey}','${subName}','${year}','${subj}')">📝 Mock Test Dein</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById('content-area').innerHTML = html;
 }
 
 /* ---------------- PREVIOUS YEAR QUESTION PAPERS (Premium Bonus) ---------------- */
@@ -942,7 +990,8 @@ const subProgramIcons = {
   "GNM":"🩺", "B.Sc Nursing":"🩺", "P.B. B.Sc Nursing":"🩺", "M.Sc Nursing":"🩺",
   "NEET (UG)":"🧬",
   "JEE Main / Advanced":"📐",
-  "Diploma Engineering":"⚙️"
+  "Diploma Engineering":"⚙️",
+  "B.Tech / B.E.":"🛠️"
 };
 
 function openCourse(courseKey){
