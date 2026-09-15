@@ -238,7 +238,7 @@
       <button data-nav="syllabus" onclick="bottomNav('syllabus')"><span class="ic">📘</span>Syllabus</button>
       <button data-nav="notes" onclick="bottomNav('notes')"><span class="ic">📝</span>Notes</button>
       <button data-nav="quiz" onclick="bottomNav('quiz')"><span class="ic">❓</span>Quiz</button>
-      <button data-nav="mocktest" onclick="renderMockTestGrid(); document.querySelectorAll('.bottomnav button').forEach(b=>b.classList.toggle('active', b.dataset.nav==='mocktest'));"><span class="ic">📝</span>Mock Test</button>
+      <button data-nav="profile" onclick="bottomNav('profile')"><span class="ic">👤</span>Profile</button>
     </div>
   </div>
 
@@ -1071,7 +1071,7 @@ function bottomNav(section){
         <div class="course-tile" onclick="bottomNav('syllabus')"><div class="ic">📘</div><h4>Syllabus</h4><div class="cnt">Subject-wise</div></div>
         <div class="course-tile" onclick="bottomNav('notes')"><div class="ic">📝</div><h4>Notes</h4><div class="cnt">Unit-wise</div></div>
         <div class="course-tile" onclick="bottomNav('quiz')"><div class="ic">❓</div><h4>Quiz</h4><div class="cnt">Practice tests</div></div>
-        <div class="course-tile" onclick="bottomNav('profile')"><div class="ic">👤</div><h4>Profile</h4><div class="cnt">Aapki details</div></div>
+        <div class="course-tile" onclick="renderMockTestGrid()"><div class="ic">📝</div><h4>Mock Test</h4><div class="cnt">Course-wise tests</div></div>
       </div>`;
   } else if(section==='profile'){
     document.getElementById('content-area').innerHTML = `
