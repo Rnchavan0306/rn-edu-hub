@@ -351,10 +351,14 @@ function getSubjects(course, sub, year){
     "Nursing|GNM|1st Year":["Anatomy & Physiology","Fundamentals of Nursing","Community Health Nursing","Microbiology"],
     "Nursing|GNM|2nd Year":["Medical Surgical Nursing","Child Health Nursing","Mental Health Nursing"],
     "Nursing|GNM|3rd Year":["Midwifery & Obstetric Nursing","Community Health Nursing-II","Nursing Administration"],
-    "Nursing|B.Sc Nursing|1st Year":["Human Anatomy","Human Physiology","Nursing Foundations","Biochemistry"],
-    "Nursing|B.Sc Nursing|2nd Year":["Medical Surgical Nursing-I","Pharmacology","Pathology","Genetics"],
-    "Nursing|B.Sc Nursing|3rd Year":["Child Health Nursing","Mental Health Nursing","Community Health Nursing-I"],
-    "Nursing|B.Sc Nursing|4th Year":["Midwifery & Obstetric Nursing","Management of Nursing Services","Research & Statistics"],
+    "Nursing|B.Sc Nursing|1st Semester":["Human Anatomy","Human Physiology","Biochemistry","Nursing Foundations-I"],
+    "Nursing|B.Sc Nursing|2nd Semester":["Nursing Foundations-II","English","Psychology","Sociology"],
+    "Nursing|B.Sc Nursing|3rd Semester":["Medical Surgical Nursing-I","Pharmacology","Pathology"],
+    "Nursing|B.Sc Nursing|4th Semester":["Medical Surgical Nursing-II","Genetics","Nutrition"],
+    "Nursing|B.Sc Nursing|5th Semester":["Child Health Nursing","Mental Health Nursing"],
+    "Nursing|B.Sc Nursing|6th Semester":["Community Health Nursing-I","Midwifery & Obstetric Nursing-I"],
+    "Nursing|B.Sc Nursing|7th Semester":["Midwifery & Obstetric Nursing-II","Management of Nursing Services","Research & Statistics"],
+    "Nursing|B.Sc Nursing|8th Semester":["Community Health Nursing-II","Nursing Research Project","Internship"],
     "Nursing|P.B. B.Sc Nursing|1st Year":["Advanced Medical Surgical Nursing","Community Health Nursing","Nursing Education"],
     "Nursing|P.B. B.Sc Nursing|2nd Year":["Midwifery & Gynecological Nursing","Nursing Research & Statistics","Management of Nursing Services"],
     "Nursing|M.Sc Nursing|1st Year":["Advanced Nursing Practice","Nursing Education","Nursing Research & Statistics"],
@@ -375,6 +379,13 @@ function getSubjects(course, sub, year){
   };
   return bank[key] || ["General Subject 1","General Subject 2"];
 }
+/* B.Sc Nursing: har Year ke andar 2 Semester group hote hain */
+const bscNursingYearSemesters = {
+  "1st Year": ["1st Semester","2nd Semester"],
+  "2nd Year": ["3rd Semester","4th Semester"],
+  "3rd Year": ["5th Semester","6th Semester"],
+  "4th Year": ["7th Semester","8th Semester"]
+};
 // mark first subject of Human Anatomy topics as 3D-enabled
 function has3D(subj){
   return subj.toLowerCase().includes("anatomy") || subj.toLowerCase().includes("physiology");
@@ -623,6 +634,24 @@ function openMockTestSubProgram(courseKey, subName, activeYear){
     html += `<button class="${y===year?'active':''}" onclick="openMockTestSubProgram('${courseKey}','${subName}','${y}')">${y}</button>`;
   });
   html += `</div>`;
+
+  if(courseKey==='Nursing' && subName==='B.Sc Nursing' && bscNursingYearSemesters[year]){
+    bscNursingYearSemesters[year].forEach(sem=>{
+      html += `<h4 style="margin:14px 0 8px;color:var(--teal-deep);">${sem}</h4>`;
+      const subjects = getSubjects(courseKey, subName, sem);
+      subjects.forEach(subj=>{
+        html += `<div class="subject-card">
+          <h4>${subj}</h4>
+          <div class="subject-actions">
+            <button class="d3" onclick="openModal('quiz','${courseKey}','${subName}','${sem}','${subj}')">📝 Mock Test Dein</button>
+          </div>
+        </div>`;
+      });
+    });
+    document.getElementById('content-area').innerHTML = html;
+    return;
+  }
+
   const subjects = getSubjects(courseKey, subName, year);
   subjects.forEach(subj=>{
     html += `<div class="subject-card">
@@ -1038,6 +1067,27 @@ function openSubProgram(courseKey, subName, activeYear){
   });
   html += `</div>`;
 
+  if(courseKey==='Nursing' && subName==='B.Sc Nursing' && bscNursingYearSemesters[year]){
+    /* Year ke andar 2 semester group dikhao */
+    bscNursingYearSemesters[year].forEach(sem=>{
+      html += `<h4 style="margin:14px 0 8px;color:var(--teal-deep);">${sem}</h4>`;
+      const subjects = getSubjects(courseKey, subName, sem);
+      subjects.forEach(subj=>{
+        html += `<div class="subject-card">
+          <h4>${subj}</h4>
+          <div class="subject-actions">
+            <button onclick="openModal('syllabus','${courseKey}','${subName}','${sem}','${subj}')">📘 Syllabus</button>
+            <button onclick="openModal('notes','${courseKey}','${subName}','${sem}','${subj}')">📝 Notes</button>
+            <button onclick="openModal('quiz','${courseKey}','${subName}','${sem}','${subj}')">❓ Quiz</button>
+            ${has3D(subj) ? `<button class="d3" onclick="openModal('3d','${courseKey}','${subName}','${sem}','${subj}')">🧊 3D Diagram</button>` : ""}
+          </div>
+        </div>`;
+      });
+    });
+    document.getElementById('content-area').innerHTML = html;
+    return;
+  }
+
   const subjects = getSubjects(courseKey, subName, year);
   subjects.forEach(subj=>{
     html += `<div class="subject-card">
@@ -1213,7 +1263,7 @@ async function openModal(type, course, sub, year, subject){
   const body = document.getElementById('modalBody');
 
   /* Premium paywall — 1st Year hamesha FREE hai; 2nd year se aage ₹9/month subscription chahiye (Admin free hai) */
-  if(!adminMode && !isPremiumActive() && year !== "1st Year" && (type==='syllabus' || type==='notes' || type==='quiz')){
+  if(!adminMode && !isPremiumActive() && year !== "1st Year" && year !== "1st Semester" && (type==='syllabus' || type==='notes' || type==='quiz')){
     body.innerHTML = `<button class="close" onclick="closeModal()">✕</button>
       <h3>🔒 Premium Content</h3>
       <p style="font-size:12.5px;color:var(--muted);margin-top:6px;">
