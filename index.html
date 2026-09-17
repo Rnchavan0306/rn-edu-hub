@@ -321,7 +321,7 @@ const courseCategories = [
 const subProgramsByCourse = {
   Pharmacy:[
     {name:"D. Pharm", years:["1st Year","2nd Year"]},
-    {name:"B. Pharm", years:["1st Year","2nd Year","3rd Year","4th Year"]},
+    {name:"B. Pharm", years:["1st Semester","2nd Semester","3rd Semester","4th Semester","5th Semester","6th Semester","7th Semester","8th Semester"]},
     {name:"M. Pharm", years:["1st Year","2nd Year"]},
   ],
   Nursing:[
@@ -342,23 +342,27 @@ function getSubjects(course, sub, year){
   const bank = {
     "Pharmacy|D. Pharm|1st Year":["Pharmaceutics-I","Pharmaceutical Chemistry-I","Biochemistry & Clinical Pathology","Human Anatomy & Physiology"],
     "Pharmacy|D. Pharm|2nd Year":["Pharmacology","Pharmaceutical Jurisprudence","Drug Store & Business Management","Hospital & Clinical Pharmacy"],
-    "Pharmacy|B. Pharm|1st Year":["Human Anatomy & Physiology","Pharmaceutical Analysis","Pharmaceutics-I","Pharmaceutical Inorganic Chemistry"],
-    "Pharmacy|B. Pharm|2nd Year":["Pharmaceutical Organic Chemistry","Physical Pharmaceutics","Pharmaceutical Microbiology","Pharmaceutical Engineering"],
-    "Pharmacy|B. Pharm|3rd Year":["Pharmacology-I","Medicinal Chemistry-I","Industrial Pharmacy-I","Pharmacognosy"],
-    "Pharmacy|B. Pharm|4th Year":["Pharmacology-II","Medicinal Chemistry-II","Pharmaceutical Biotechnology","Pharmacy Practice"],
+    "Pharmacy|B. Pharm|1st Semester":["Human Anatomy & Physiology-I","Pharmaceutical Analysis-I","Pharmaceutics-I","Pharmaceutical Inorganic Chemistry","Communication Skills","Remedial Biology / Remedial Mathematics"],
+    "Pharmacy|B. Pharm|2nd Semester":["Human Anatomy & Physiology-II","Pharmaceutical Organic Chemistry-I","Biochemistry","Pathophysiology","Computer Applications in Pharmacy","Environmental Sciences"],
+    "Pharmacy|B. Pharm|3rd Semester":["Pharmaceutical Organic Chemistry-II","Physical Pharmaceutics-I","Pharmaceutical Microbiology","Pharmaceutical Engineering"],
+    "Pharmacy|B. Pharm|4th Semester":["Pharmaceutical Organic Chemistry-III","Medicinal Chemistry-I","Physical Pharmaceutics-II","Pharmacology-I","Pharmacognosy & Phytochemistry-I"],
+    "Pharmacy|B. Pharm|5th Semester":["Medicinal Chemistry-II","Industrial Pharmacy-I","Pharmacology-II","Pharmacognosy & Phytochemistry-II","Pharmaceutical Jurisprudence"],
+    "Pharmacy|B. Pharm|6th Semester":["Medicinal Chemistry-III","Pharmacology-III","Herbal Drug Technology","Biopharmaceutics & Pharmacokinetics","Pharmaceutical Biotechnology"],
+    "Pharmacy|B. Pharm|7th Semester":["Instrumental Methods of Analysis","Industrial Pharmacy-II","Pharmacy Practice","Novel Drug Delivery System","Elective (Pharma Marketing / Regulatory Science / Pharmacovigilance)"],
+    "Pharmacy|B. Pharm|8th Semester":["Biostatistics & Research Methodology","Social & Preventive Pharmacy","Project Work / Industrial Training","Elective-II (Marketing / Regulatory Science / Herbal QC)"],
     "Pharmacy|M. Pharm|1st Year":["Advanced Pharmacology","Modern Pharmaceutical Analytical Techniques","Advanced Medicinal Chemistry"],
     "Pharmacy|M. Pharm|2nd Year":["Research Methodology","Dissertation Work","Regulatory Affairs"],
     "Nursing|GNM|1st Year":["Anatomy & Physiology","Fundamentals of Nursing","Community Health Nursing","Microbiology"],
     "Nursing|GNM|2nd Year":["Medical Surgical Nursing","Child Health Nursing","Mental Health Nursing"],
     "Nursing|GNM|3rd Year":["Midwifery & Obstetric Nursing","Community Health Nursing-II","Nursing Administration"],
-    "Nursing|B.Sc Nursing|1st Semester":["Human Anatomy","Human Physiology","Biochemistry","Nursing Foundations-I"],
+    "Nursing|B.Sc Nursing|1st Semester":["Communicative English","Applied Anatomy","Applied Physiology","Applied Sociology","Applied Psychology","Nursing Foundation-I (including First Aid Module)"],
     "Nursing|B.Sc Nursing|2nd Semester":["Nursing Foundations-II","English","Psychology","Sociology"],
     "Nursing|B.Sc Nursing|3rd Semester":["Medical Surgical Nursing-I","Pharmacology","Pathology"],
     "Nursing|B.Sc Nursing|4th Semester":["Medical Surgical Nursing-II","Genetics","Nutrition"],
     "Nursing|B.Sc Nursing|5th Semester":["Child Health Nursing","Mental Health Nursing"],
     "Nursing|B.Sc Nursing|6th Semester":["Community Health Nursing-I","Midwifery & Obstetric Nursing-I"],
     "Nursing|B.Sc Nursing|7th Semester":["Midwifery & Obstetric Nursing-II","Management of Nursing Services","Research & Statistics"],
-    "Nursing|B.Sc Nursing|8th Semester":["Community Health Nursing-II","Nursing Research Project","Internship"],
+    "Nursing|B.Sc Nursing|8th Semester":["Trends & Issues in Nursing / Health Care","Internship (Clinical Practicum)"],
     "Nursing|P.B. B.Sc Nursing|1st Year":["Advanced Medical Surgical Nursing","Community Health Nursing","Nursing Education"],
     "Nursing|P.B. B.Sc Nursing|2nd Year":["Midwifery & Gynecological Nursing","Nursing Research & Statistics","Management of Nursing Services"],
     "Nursing|M.Sc Nursing|1st Year":["Advanced Nursing Practice","Nursing Education","Nursing Research & Statistics"],
@@ -385,6 +389,10 @@ const bscNursingYearSemesters = {
   "2nd Year": ["3rd Semester","4th Semester"],
   "3rd Year": ["5th Semester","6th Semester"],
   "4th Year": ["7th Semester","8th Semester"]
+};
+const semesterRoman = {
+  "1st Semester":"I", "2nd Semester":"II", "3rd Semester":"III", "4th Semester":"IV",
+  "5th Semester":"V", "6th Semester":"VI", "7th Semester":"VII", "8th Semester":"VIII"
 };
 // mark first subject of Human Anatomy topics as 3D-enabled
 function has3D(subj){
@@ -637,7 +645,7 @@ function openMockTestSubProgram(courseKey, subName, activeYear){
 
   if(courseKey==='Nursing' && subName==='B.Sc Nursing' && bscNursingYearSemesters[year]){
     bscNursingYearSemesters[year].forEach(sem=>{
-      html += `<h4 style="margin:14px 0 8px;color:var(--teal-deep);">${sem}</h4>`;
+      html += `<h4 style="margin:14px 0 8px;color:var(--teal-deep);">Course of Instruction — ${semesterRoman[sem]} Semester</h4>`;
       const subjects = getSubjects(courseKey, subName, sem);
       subjects.forEach(subj=>{
         html += `<div class="subject-card">
@@ -1070,7 +1078,7 @@ function openSubProgram(courseKey, subName, activeYear){
   if(courseKey==='Nursing' && subName==='B.Sc Nursing' && bscNursingYearSemesters[year]){
     /* Year ke andar 2 semester group dikhao */
     bscNursingYearSemesters[year].forEach(sem=>{
-      html += `<h4 style="margin:14px 0 8px;color:var(--teal-deep);">${sem}</h4>`;
+      html += `<h4 style="margin:14px 0 8px;color:var(--teal-deep);">Course of Instruction — ${semesterRoman[sem]} Semester</h4>`;
       const subjects = getSubjects(courseKey, subName, sem);
       subjects.forEach(subj=>{
         html += `<div class="subject-card">
