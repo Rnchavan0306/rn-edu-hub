@@ -139,8 +139,12 @@
 
   .hidden{display:none;}
 </style>
+  .content, .modal, .subject-card, .adm-card { -webkit-user-select:none; user-select:none; }
 </head>
-<body>
+<body oncontextmenu="return false;">
+<script>document.addEventListener('DOMContentLoaded', function(){
+  document.addEventListener('contextmenu', e=>e.preventDefault());
+});</script>
 <div id="phone">
 
   <!-- ================= LOGIN SCREEN ================= -->
@@ -278,6 +282,13 @@
 </script>
 
 <script>
+/* Deterrent only — right-click aur text-selection ko band karna, PDF/content copy karna thoda mushkil banane ke liye.
+   Ye 100% screenshot ya download rokta nahi — web technology me ye possible nahi hai. */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if(e.key === 'PrintScreen'){ e.preventDefault(); }
+});
+
 /* ---------------- DATA ---------------- */
 const admissionData = {
   Pharmacy: {
@@ -322,13 +333,13 @@ const subProgramsByCourse = {
   Pharmacy:[
     {name:"D. Pharm", years:["1st Year","2nd Year"]},
     {name:"B. Pharm", years:["1st Semester","2nd Semester","3rd Semester","4th Semester","5th Semester","6th Semester","7th Semester","8th Semester"]},
-    {name:"M. Pharm", years:["1st Year","2nd Year"]},
+    {name:"M. Pharm", years:["1st Semester","2nd Semester","3rd Semester","4th Semester"]},
   ],
   Nursing:[
     {name:"GNM", years:["1st Year","2nd Year","3rd Year"]},
     {name:"B.Sc Nursing", years:["1st Year","2nd Year","3rd Year","4th Year"]},
-    {name:"P.B. B.Sc Nursing", years:["1st Year","2nd Year"]},
-    {name:"M.Sc Nursing", years:["1st Year","2nd Year"]},
+    {name:"P.B. B.Sc Nursing", years:["1st Semester","2nd Semester","3rd Semester","4th Semester"]},
+    {name:"M.Sc Nursing", years:["1st Semester","2nd Semester","3rd Semester","4th Semester"]},
   ],
   NEET:[{name:"NEET (UG)", years:["Physics","Chemistry","Biology"]}],
   JEE:[{name:"JEE Main / Advanced", years:["Physics","Chemistry","Maths"]}],
@@ -350,8 +361,10 @@ function getSubjects(course, sub, year){
     "Pharmacy|B. Pharm|6th Semester":["Medicinal Chemistry-III","Pharmacology-III","Herbal Drug Technology","Biopharmaceutics & Pharmacokinetics","Pharmaceutical Biotechnology"],
     "Pharmacy|B. Pharm|7th Semester":["Instrumental Methods of Analysis","Industrial Pharmacy-II","Pharmacy Practice","Novel Drug Delivery System","Elective (Pharma Marketing / Regulatory Science / Pharmacovigilance)"],
     "Pharmacy|B. Pharm|8th Semester":["Biostatistics & Research Methodology","Social & Preventive Pharmacy","Project Work / Industrial Training","Elective-II (Marketing / Regulatory Science / Herbal QC)"],
-    "Pharmacy|M. Pharm|1st Year":["Advanced Pharmacology","Modern Pharmaceutical Analytical Techniques","Advanced Medicinal Chemistry"],
-    "Pharmacy|M. Pharm|2nd Year":["Research Methodology","Dissertation Work","Regulatory Affairs"],
+    "Pharmacy|M. Pharm|1st Semester":["Advanced Pharmacology","Modern Pharmaceutical Analytical Techniques"],
+    "Pharmacy|M. Pharm|2nd Semester":["Advanced Medicinal Chemistry","Research Methodology"],
+    "Pharmacy|M. Pharm|3rd Semester":["Dissertation Work (Phase-I)","Regulatory Affairs"],
+    "Pharmacy|M. Pharm|4th Semester":["Dissertation Work (Phase-II)","Seminar & Publication"],
     "Nursing|GNM|1st Year":["Anatomy & Physiology","Fundamentals of Nursing","Community Health Nursing","Microbiology"],
     "Nursing|GNM|2nd Year":["Medical Surgical Nursing","Child Health Nursing","Mental Health Nursing"],
     "Nursing|GNM|3rd Year":["Midwifery & Obstetric Nursing","Community Health Nursing-II","Nursing Administration"],
@@ -363,10 +376,14 @@ function getSubjects(course, sub, year){
     "Nursing|B.Sc Nursing|6th Semester":["Community Health Nursing-I","Midwifery & Obstetric Nursing-I"],
     "Nursing|B.Sc Nursing|7th Semester":["Midwifery & Obstetric Nursing-II","Management of Nursing Services","Research & Statistics"],
     "Nursing|B.Sc Nursing|8th Semester":["Trends & Issues in Nursing / Health Care","Internship (Clinical Practicum)"],
-    "Nursing|P.B. B.Sc Nursing|1st Year":["Advanced Medical Surgical Nursing","Community Health Nursing","Nursing Education"],
-    "Nursing|P.B. B.Sc Nursing|2nd Year":["Midwifery & Gynecological Nursing","Nursing Research & Statistics","Management of Nursing Services"],
-    "Nursing|M.Sc Nursing|1st Year":["Advanced Nursing Practice","Nursing Education","Nursing Research & Statistics"],
-    "Nursing|M.Sc Nursing|2nd Year":["Clinical Specialty Nursing","Advanced Nursing Management"],
+    "Nursing|P.B. B.Sc Nursing|1st Semester":["Advanced Medical Surgical Nursing-I","Nursing Education"],
+    "Nursing|P.B. B.Sc Nursing|2nd Semester":["Advanced Medical Surgical Nursing-II","Community Health Nursing"],
+    "Nursing|P.B. B.Sc Nursing|3rd Semester":["Midwifery & Gynecological Nursing","Nursing Research & Statistics"],
+    "Nursing|P.B. B.Sc Nursing|4th Semester":["Management of Nursing Services","Clinical Specialty Practicum"],
+    "Nursing|M.Sc Nursing|1st Semester":["Advanced Nursing Practice","Nursing Education"],
+    "Nursing|M.Sc Nursing|2nd Semester":["Nursing Research & Statistics","Advanced Nursing Theories"],
+    "Nursing|M.Sc Nursing|3rd Semester":["Clinical Specialty Nursing-I","Advanced Nursing Management"],
+    "Nursing|M.Sc Nursing|4th Semester":["Clinical Specialty Nursing-II (Practicum)","Dissertation"],
     "NEET|NEET (UG)|Biology":["Human Physiology","Cell Structure & Function","Genetics & Evolution","Plant Physiology","Reproduction"],
     "NEET|NEET (UG)|Physics":["Mechanics","Optics","Modern Physics","Thermodynamics","Electrostatics"],
     "NEET|NEET (UG)|Chemistry":["Organic Chemistry","Inorganic Chemistry","Physical Chemistry","Chemical Bonding"],
@@ -1164,14 +1181,66 @@ function bottomNav(section){
           : `<button class="btn secondary" style="margin-top:8px" onclick="adminLogin()">Admin Login</button>`}
       </div>`;
   } else if(section==='syllabus' || section==='notes' || section==='quiz'){
-    document.getElementById('content-area').innerHTML = `
-      <div class="subject-card">
-        <h4>${section.charAt(0).toUpperCase()+section.slice(1)}</h4>
-        <p style="font-size:12.5px;color:var(--muted);">Kisi bhi Course ke andar jaakar subject choose karein — wahan se ${section} seedha khul jayega.</p>
-        <button class="btn" style="margin-top:10px" onclick="renderCoursesGrid()">Courses par jaayein</button>
-      </div>`;
+    renderBrowseGrid(section);
+    return;
   }
 }
+
+/* ---------------- SINGLE-ACTION BROWSING (Syllabus-only / Notes-only / Quiz-only) ---------------- */
+function actionTitle(action){ return action==='syllabus' ? 'Syllabus' : action==='notes' ? 'Notes' : 'Mock Test'; }
+function actionButtonLabel(action){ return action==='syllabus' ? '📘 Syllabus Dekhein' : action==='notes' ? '📝 Notes Dekhein' : '📝 Mock Test Dein'; }
+
+function renderBrowseGrid(action){
+  document.querySelectorAll('.bottomnav button').forEach(b=>b.classList.toggle('active', b.dataset.nav===action));
+  let html = `<div class="backbar"><h3>${actionTitle(action)} — Course Select Karein</h3></div><div class="grid5">`;
+  courseCategories.forEach(c=>{
+    html += `<div class="course-tile" onclick="openBrowseCourse('${action}','${c.key}')"><div class="ic">${c.icon}</div><h4>${c.key}</h4><div class="cnt">${subProgramsByCourse[c.key].length} programs</div></div>`;
+  });
+  html += `</div>`;
+  document.getElementById('content-area').innerHTML = html;
+}
+function openBrowseCourse(action, courseKey){
+  const subs = subProgramsByCourse[courseKey];
+  let html = `<div class="backbar"><button onclick="renderBrowseGrid('${action}')">←</button><h3>${courseKey} — ${actionTitle(action)}</h3></div><div class="grid5">`;
+  subs.forEach(s=>{
+    html += `<div class="course-tile" onclick="openBrowseSubProgram('${action}','${courseKey}','${s.name}')">
+      <div class="ic">${subProgramIcons[s.name] || "📚"}</div><h4>${s.name}</h4>
+      <div class="cnt">${s.years.length} sections</div>
+    </div>`;
+  });
+  html += `</div>`;
+  document.getElementById('content-area').innerHTML = html;
+}
+function openBrowseSubProgram(action, courseKey, subName, activeYear){
+  const subObj = subProgramsByCourse[courseKey].find(s=>s.name===subName);
+  const year = activeYear || subObj.years[0];
+  let html = `<div class="backbar"><button onclick="openBrowseCourse('${action}','${courseKey}')">←</button><h3>${subName} — ${actionTitle(action)}</h3></div>
+    <div class="yeartab">`;
+  subObj.years.forEach(y=>{
+    html += `<button class="${y===year?'active':''}" onclick="openBrowseSubProgram('${action}','${courseKey}','${subName}','${y}')">${y}</button>`;
+  });
+  html += `</div>`;
+
+  const card = (subj, semLabel) => `<div class="subject-card">
+      <h4>${subj}</h4>
+      <div class="subject-actions">
+        <button class="d3" onclick="openModal('${action}','${courseKey}','${subName}','${semLabel}','${subj}')">${actionButtonLabel(action)}</button>
+      </div>
+    </div>`;
+
+  if(courseKey==='Nursing' && subName==='B.Sc Nursing' && bscNursingYearSemesters[year]){
+    bscNursingYearSemesters[year].forEach(sem=>{
+      html += `<h4 style="margin:14px 0 8px;color:var(--teal-deep);">Course of Instruction — ${semesterRoman[sem]} Semester</h4>`;
+      getSubjects(courseKey, subName, sem).forEach(subj=> html += card(subj, sem));
+    });
+    document.getElementById('content-area').innerHTML = html;
+    return;
+  }
+
+  getSubjects(courseKey, subName, year).forEach(subj=> html += card(subj, year));
+  document.getElementById('content-area').innerHTML = html;
+}
+function renderMockTestGrid(){ renderBrowseGrid('quiz'); }
 
 /* Subject-wise syllabus PDF — saved permanently in Firebase (Storage + Firestore) once configured above.
    Falls back to this-session-only storage if Firebase config isn't filled in yet. */
@@ -1301,7 +1370,7 @@ async function openModal(type, course, sub, year, subject){
     if(uploaded){
       html += `<div class="syll-item" style="border-bottom:none;margin-top:8px;">
           <span>📄 ${uploaded.name}</span>
-          <a class="reg-link" style="padding:5px 10px;" href="${uploaded.url}" target="_blank">Kholein</a>
+          <button class="reg-link" style="padding:5px 10px;border:none;cursor:pointer;" onclick="viewProtectedPdf('${uploaded.url.replace(/'/g,"&#39;")}','${uploaded.name.replace(/'/g,"&#39;")}')">Dekhein</button>
         </div>`;
       if(adminMode){
         html += `<label class="btn secondary" style="display:block;text-align:center;margin-top:6px;cursor:pointer;">
@@ -1349,6 +1418,19 @@ async function openModal(type, course, sub, year, subject){
   overlay.classList.add('open');
 }
 function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); }
+
+/* PDF ko in-app viewer me dikhana (best-effort — right-click/save disable, direct download link nahi) */
+function viewProtectedPdf(url, name){
+  const overlay = document.getElementById('modalOverlay');
+  const body = document.getElementById('modalBody');
+  body.innerHTML = `<button class="close" onclick="closeModal()">✕</button>
+    <h3 style="font-size:14px;">${name}</h3>
+    <div oncontextmenu="return false;" style="margin-top:8px;border:1px solid var(--line);border-radius:10px;overflow:hidden;">
+      <iframe src="${url}#toolbar=0&navpanes=0" style="width:100%;height:60vh;border:none;" oncontextmenu="return false;"></iframe>
+    </div>
+    <p style="font-size:10px;color:var(--muted);text-align:center;margin-top:8px;">Ye sirf viewing ke liye hai.</p>`;
+  overlay.classList.add('open');
+}
 </script>
 </body>
 </html>
