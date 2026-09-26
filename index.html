@@ -337,7 +337,7 @@ const subProgramsByCourse = {
   ],
   Nursing:[
     {name:"GNM", years:["1st Year","2nd Year","3rd Year"]},
-    {name:"B.Sc Nursing", years:["1st Year","2nd Year","3rd Year","4th Year"]},
+    {name:"B.Sc Nursing", years:["1st Semester","2nd Semester","3rd Semester","4th Semester","5th Semester","6th Semester","7th Semester","8th Semester"]},
     {name:"P.B. B.Sc Nursing", years:["1st Semester","2nd Semester","3rd Semester","4th Semester"]},
     {name:"M.Sc Nursing", years:["1st Semester","2nd Semester","3rd Semester","4th Semester"]},
   ],
@@ -369,13 +369,13 @@ function getSubjects(course, sub, year){
     "Nursing|GNM|2nd Year":["Medical Surgical Nursing","Child Health Nursing","Mental Health Nursing"],
     "Nursing|GNM|3rd Year":["Midwifery & Obstetric Nursing","Community Health Nursing-II","Nursing Administration"],
     "Nursing|B.Sc Nursing|1st Semester":["Communicative English","Applied Anatomy","Applied Physiology","Applied Sociology","Applied Psychology","Nursing Foundation-I (including First Aid Module)"],
-    "Nursing|B.Sc Nursing|2nd Semester":["Nursing Foundations-II","English","Psychology","Sociology"],
-    "Nursing|B.Sc Nursing|3rd Semester":["Medical Surgical Nursing-I","Pharmacology","Pathology"],
-    "Nursing|B.Sc Nursing|4th Semester":["Medical Surgical Nursing-II","Genetics","Nutrition"],
-    "Nursing|B.Sc Nursing|5th Semester":["Child Health Nursing","Mental Health Nursing"],
-    "Nursing|B.Sc Nursing|6th Semester":["Community Health Nursing-I","Midwifery & Obstetric Nursing-I"],
-    "Nursing|B.Sc Nursing|7th Semester":["Midwifery & Obstetric Nursing-II","Management of Nursing Services","Research & Statistics"],
-    "Nursing|B.Sc Nursing|8th Semester":["Trends & Issues in Nursing / Health Care","Internship (Clinical Practicum)"],
+    "Nursing|B.Sc Nursing|2nd Semester":["Applied Biochemistry","Applied Nutrition & Dietetics","Nursing Foundation-II (including Health Assessment Module)","Health Nursing Informatics Technology"],
+    "Nursing|B.Sc Nursing|3rd Semester":["Applied Microbiology & Infection Control (including Safety)","Pharmacology-I","Pathology-I","Adult Health Nursing-I"],
+    "Nursing|B.Sc Nursing|4th Semester":["Pharmacology-II","Pathology-II & Genetics","Professionalism, Professional Values & Ethics (including Bioethics)","Adult Health Nursing-II"],
+    "Nursing|B.Sc Nursing|5th Semester":["Introduction to Forensic Nursing & Indian Laws","Child Health Nursing-I","Community Health Nursing-I (including Environmental Science & Epidemiology)","Educational Technology & Nursing Education","Mental Health Nursing-I"],
+    "Nursing|B.Sc Nursing|6th Semester":["Child Health Nursing-II","Mental Health Nursing-II","Midwifery, Obstetrics & Gynaecology (OBG) Nursing-I (including SBA Module)","Nursing Management & Leadership"],
+    "Nursing|B.Sc Nursing|7th Semester":["Community Health Nursing-II","Midwifery, Obstetrics & Gynaecology (OBG) Nursing (I and II)","Nursing Research & Statistics"],
+    "Nursing|B.Sc Nursing|8th Semester":["Assessment / Internship / Practical"],
     "Nursing|P.B. B.Sc Nursing|1st Semester":["Advanced Medical Surgical Nursing-I","Nursing Education"],
     "Nursing|P.B. B.Sc Nursing|2nd Semester":["Advanced Medical Surgical Nursing-II","Community Health Nursing"],
     "Nursing|P.B. B.Sc Nursing|3rd Semester":["Midwifery & Gynecological Nursing","Nursing Research & Statistics"],
@@ -1114,6 +1114,9 @@ function openSubProgram(courseKey, subName, activeYear){
   }
 
   const subjects = getSubjects(courseKey, subName, year);
+  if(courseKey==='Nursing' && subName==='B.Sc Nursing' && semesterRoman[year]){
+    html += `<h4 style="margin:14px 0 8px;color:var(--teal-deep);">Course of Instruction — ${semesterRoman[year]} Semester</h4>`;
+  }
   subjects.forEach(subj=>{
     html += `<div class="subject-card">
       <h4>${subj}</h4>
@@ -1237,6 +1240,9 @@ function openBrowseSubProgram(action, courseKey, subName, activeYear){
     return;
   }
 
+  if(courseKey==='Nursing' && subName==='B.Sc Nursing' && semesterRoman[year]){
+    html += `<h4 style="margin:14px 0 8px;color:var(--teal-deep);">Course of Instruction — ${semesterRoman[year]} Semester</h4>`;
+  }
   getSubjects(courseKey, subName, year).forEach(subj=> html += card(subj, year));
   document.getElementById('content-area').innerHTML = html;
 }
