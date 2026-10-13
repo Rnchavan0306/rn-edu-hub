@@ -1352,12 +1352,22 @@ async function adminEditUnits(course,sub,year,subject){
 }
 
 /* ---------------- MODAL ---------------- */
+/* Pehle saal/semester ke sirf pehle 2 subjects FREE hain (Syllabus/Notes ke liye); baaki sab locked */
+function isFreeFirstTwoSubject(course, sub, year, subject){
+  const subObj = subProgramsByCourse[course] && subProgramsByCourse[course].find(s=>s.name===sub);
+  if(!subObj || subObj.years[0] !== year) return false;
+  const subjects = getSubjects(course, sub, year);
+  const idx = subjects.indexOf(subject);
+  return idx !== -1 && idx < 2;
+}
+
 async function openModal(type, course, sub, year, subject){
   const overlay = document.getElementById('modalOverlay');
   const body = document.getElementById('modalBody');
 
-  /* Premium paywall — 1st Year hamesha FREE hai; 2nd year se aage ₹9/month subscription chahiye (Admin free hai) */
-  if(!adminMode && !isPremiumActive() && year !== "1st Year" && year !== "1st Semester" && (type==='syllabus' || type==='notes' || type==='quiz')){
+  /* Premium paywall — sirf pehle year/semester ke pehle 2 subjects ka Syllabus/Notes FREE hai; Quiz hamesha locked; baaki sab ₹9/month (Admin free hai) */
+  const isFreeContent = (type==='syllabus' || type==='notes') && isFreeFirstTwoSubject(course, sub, year, subject);
+  if(!adminMode && !isPremiumActive() && !isFreeContent && (type==='syllabus' || type==='notes' || type==='quiz')){
     body.innerHTML = `<button class="close" onclick="closeModal()">✕</button>
       <h3>🔒 Premium Content</h3>
       <p style="font-size:12.5px;color:var(--muted);margin-top:6px;">
