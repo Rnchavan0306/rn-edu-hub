@@ -1262,6 +1262,7 @@ function renderMockTestGrid(){ renderBrowseGrid('quiz'); }
 /* Subject-wise syllabus PDF — saved permanently in Firebase (Storage + Firestore) once configured above.
    Falls back to this-session-only storage if Firebase config isn't filled in yet. */
 let uploadedSyllabus = {}; // session fallback cache
+let uploadedNotes = {}; // session fallback cache (Notes PDF)
 function syllKey(course,sub,year,subject){
   return (course+"_"+sub+"_"+year+"_"+subject).replace(/[^a-zA-Z0-9_]/g,"_");
 }
@@ -1301,6 +1302,48 @@ async function handleSyllabusUpload(evt, course, sub, year, subject){
     alert('Upload fail hua — Firebase config/rules check karein. (Console me error dekhein)');
   }
 }
+
+async function fetchUploadedNotes(course,sub,year,subject){
+  const key = syllKey(course,sub,year,subject);
+  if(!firebaseReady) return uploadedNotes[key] || null;
+  try{
+    const doc = await window.db.collection('notes_files').doc(key).get();
+    if(doc.exists) return doc.data();
+    return null;
+  }catch(e){ console.error(e); return uploadedNotes[key] || null; }
+}
+async function handleNotesUpload(evt, course, sub, year, subject){
+  const file = evt.target.files[0];
+  if(!file) return;
+  if(file.type !== 'application/pdf'){ alert('Kripya sirf PDF file upload karein.'); return; }
+  const key = syllKey(course,sub,year,subject);
+
+  if(!firebaseReady){
+    uploadedNotes[key] = { name:file.name, url:URL.createObjectURL(file) };
+    openModal('notes', course, sub, year, subject);
+    return;
+  }
+  try{
+    document.getElementById('modalBody').insertAdjacentHTML('beforeend','<p id="uploadStatus" style="font-size:11px;color:var(--muted);text-align:center;">Uploading…</p>');
+    const path = `notes/${course}/${sub}/${year}/${subject}/${Date.now()}_${file.name}`;
+    const ref = window.fbStorage.ref().child(path);
+    await ref.put(file);
+    const url = await ref.getDownloadURL();
+    await window.db.collection('notes_files').doc(key).set({
+      name:file.name, url:url, course, sub, year, subject, uploadedAt: Date.now()
+    });
+    openModal('notes', course, sub, year, subject);
+  }catch(e){
+    console.error(e);
+    alert('Upload fail hua — Firebase config/rules check karein. (Console me error dekhein)');
+  }
+}
+
+
+
+/* Notes PDF upload — Syllabus jaisa hi system, alag Firestore collection/Storage path me */
+
+
 
 /* ---------------- ADMIN MODE ---------------- */
 let adminMode = false;
@@ -1417,10 +1460,30 @@ async function openModal(type, course, sub, year, subject){
     body.innerHTML = html;
     return;
   } else if(type==='notes'){
-    html += `<div class="syll-item"><span>${subject} — Unit-wise Notes</span><span class="badge">Open</span></div>
-      <div class="syll-item"><span>${subject} — Important Questions</span><span class="badge">Open</span></div>
-      <div class="syll-item"><span>${subject} — Previous Year Papers</span><span class="badge">Open</span></div>
-      <div class="syll-item"><span>${subject} — Short Notes / Revision</span><span class="badge">Open</span></div>`;
+    body.innerHTML = html + `<p style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px;">Notes load ho rahe hain…</p>`;
+    overlay.classList.add('open');
+    const notesFile = await fetchUploadedNotes(course,sub,year,subject);
+    if(notesFile){
+      html += `<div class="syll-item" style="border-bottom:none;margin-top:8px;">
+          <span>📄 ${notesFile.name}</span>
+          <button class="reg-link" style="padding:5px 10px;border:none;cursor:pointer;" onclick="viewProtectedPdf('${notesFile.url.replace(/'/g,"&#39;")}','${notesFile.name.replace(/'/g,"&#39;")}')">Dekhein</button>
+        </div>`;
+      if(adminMode){
+        html += `<label class="btn secondary" style="display:block;text-align:center;margin-top:6px;cursor:pointer;">
+          Naye Notes Upload karein
+          <input type="file" accept="application/pdf" style="display:none" onchange="handleNotesUpload(event,'${course}','${sub}','${year}','${subject}')">
+        </label>`;
+      }
+    } else if(adminMode){
+      html += `<label class="btn" style="display:block;text-align:center;margin-top:12px;cursor:pointer;">
+          Notes PDF Upload karein
+          <input type="file" accept="application/pdf" style="display:none" onchange="handleNotesUpload(event,'${course}','${sub}','${year}','${subject}')">
+        </label>`;
+    } else {
+      html += `<p style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px;">Notes abhi upload nahi hue hain.</p>`;
+    }
+    body.innerHTML = html;
+    return;
   } else if(type==='quiz'){
     html += `<div class="quiz-q">Q1. ${subject} se related ek basic concept question yahan aayega.
       <label class="quiz-opt"><input type="radio" name="q1"> Option A</label>
@@ -1461,4 +1524,3 @@ function viewProtectedPdf(url, name){
 </script>
 </body>
 </html>
-
